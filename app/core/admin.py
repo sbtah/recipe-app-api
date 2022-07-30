@@ -55,3 +55,4 @@ class UserAdmin(BaseUserAdmin):
 # Registering custom user admin is optional,
 # but it will use default if not added.
 admin.site.register(models.User, UserAdmin)
+admin.site.register(models.Recipe)
