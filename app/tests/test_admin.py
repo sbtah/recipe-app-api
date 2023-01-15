@@ -14,7 +14,6 @@ class TestAdminSite:
     def test_users_list(self, client, example_superuser, example_user):
         """Test that users are listed on Admin page."""
 
-        superuser = example_superuser
         user = example_user
         client.force_login(example_superuser)
 
@@ -27,7 +26,6 @@ class TestAdminSite:
     def test_edit_user_page(self, client, example_superuser, example_user):
         """Test the edit user page works."""
 
-        superuser = example_superuser
         user = example_user
         client.force_login(example_superuser)
 
@@ -39,8 +37,6 @@ class TestAdminSite:
     def test_create_user_page(self, client, example_superuser, example_user):
         """Test the create user page works."""
 
-        superuser = example_superuser
-        user = example_user
         client.force_login(example_superuser)
 
         url = reverse("admin:users_user_add")
