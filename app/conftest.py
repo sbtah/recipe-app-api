@@ -17,3 +17,18 @@ def example_user():
         password="testpass321!",
         name="Test User",
     )
+
+
+@pytest.fixture
+def authenticated_client(example_user, api_client):
+    user = example_user
+    api_client.force_authenticate(user=user)
+    yield api_client
+    api_client.force_authenticate(user=None)
+
+
+@pytest.fixture
+def api_client():
+    from rest_framework.test import APIClient
+
+    return APIClient()
