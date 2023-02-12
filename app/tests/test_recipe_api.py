@@ -1,8 +1,6 @@
 """
 Tests for recipe APIs.
 """
-from decimal import Decimal
-
 import pytest
 from django.urls import reverse
 from recipes.models import Recipe
