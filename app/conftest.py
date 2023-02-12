@@ -23,6 +23,15 @@ def example_user():
 
 
 @pytest.fixture
+def example_user_2():
+    return get_user_model().objects.create_user(
+        email="user_2@example.com",
+        password="testpass321!",
+        name="Test User 2",
+    )
+
+
+@pytest.fixture
 def create_example_recipe(example_user):
     """Create and return sample Recipe."""
 
@@ -32,6 +41,19 @@ def create_example_recipe(example_user):
         time_minutes=5,
         price=Decimal("5.50"),
         description="Sample Recipe Description.",
+    )
+
+
+@pytest.fixture
+def create_example_recipe_for_user_2(example_user_2):
+    """Create and return sample Recipe."""
+
+    return Recipe.objects.create(
+        user=example_user_2,
+        title="Sample Recipe Name 2",
+        time_minutes=11,
+        price=Decimal("7.50"),
+        description="Sample Recipe Description 2.",
     )
 
 
