@@ -1,5 +1,8 @@
+from decimal import Decimal
+
 import pytest
 from django.contrib.auth import get_user_model
+from recipes.models import Recipe
 
 
 @pytest.fixture
@@ -16,6 +19,19 @@ def example_user():
         email="user@example.com",
         password="testpass321!",
         name="Test User",
+    )
+
+
+@pytest.fixture
+def create_example_recipe(example_user):
+    """Create and return sample Recipe."""
+
+    return Recipe.objects.create(
+        user=example_user,
+        title="Sample Recipe Name",
+        time_minutes=5,
+        price=Decimal("5.50"),
+        description="Sample Recipe Description.",
     )
 
 
