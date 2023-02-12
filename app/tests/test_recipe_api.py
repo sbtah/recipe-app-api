@@ -11,6 +11,7 @@ from rest_framework import status
 
 
 RECIPES_URL = reverse("recipes:recipe-list")
+pytestmark = pytest.mark.django_db
 
 
 class TestPublicRecipeApi:
