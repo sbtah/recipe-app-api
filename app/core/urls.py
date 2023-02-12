@@ -15,4 +15,5 @@ urlpatterns = [
         name="api-docs",
     ),
     path("api/users/", include("users.urls", namespace="users")),
+    path("api/recipes/", include("recipes.urls", namespace="recipes")),
 ]
