@@ -4,12 +4,17 @@ Tests for recipe APIs.
 import pytest
 from django.urls import reverse
 from recipes.models import Recipe
-from recipes.serializers import RecipeSerializer
+from recipes.serializers import RecipeSerializer, RecipeDetailSerializer
 from rest_framework import status
 
 
 RECIPES_URL = reverse("recipes:recipe-list")
 pytestmark = pytest.mark.django_db
+
+
+def detail_url(recipe_id):
+    """Create and return recipe detail URL."""
+    return reverse("recipies:recipe-detail", args=[recipe_id])
 
 
 class TestPublicRecipeApi:
