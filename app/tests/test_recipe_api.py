@@ -14,7 +14,7 @@ pytestmark = pytest.mark.django_db
 
 def detail_url(recipe_id):
     """Create and return recipe detail URL."""
-    return reverse("recipies:recipe-detail", args=[recipe_id])
+    return reverse("recipes:recipe-detail", args=[recipe_id])
 
 
 class TestPublicRecipeApi:
@@ -68,6 +68,21 @@ class TestPrivateRecipeApi:
         res = authenticated_client.get(RECIPES_URL)
         recipes = Recipe.objects.filter(user=user)
         serializer = RecipeSerializer(recipes, many=True)
+
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data == serializer.data
+
+    def test_get_recipe_detail(
+        self,
+        create_example_recipe,
+        authenticated_client,
+    ):
+        """Test get recipe detail."""
+
+        recipe = create_example_recipe
+        url = detail_url(recipe_id=recipe.id)
+        res = authenticated_client.get(url)
+        serializer = RecipeDetailSerializer(recipe)
 
         assert res.status_code == status.HTTP_200_OK
         assert res.data == serializer.data
