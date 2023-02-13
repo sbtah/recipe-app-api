@@ -1,12 +1,13 @@
 """
 Tests for recipe APIs.
 """
+from decimal import Decimal
+
 import pytest
 from django.urls import reverse
 from recipes.models import Recipe
-from recipes.serializers import RecipeSerializer, RecipeDetailSerializer
+from recipes.serializers import RecipeDetailSerializer, RecipeSerializer
 from rest_framework import status
-
 
 RECIPES_URL = reverse("recipes:recipe-list")
 pytestmark = pytest.mark.django_db
@@ -86,3 +87,19 @@ class TestPrivateRecipeApi:
 
         assert res.status_code == status.HTTP_200_OK
         assert res.data == serializer.data
+
+    def test_create_recipe(self, authenticated_client, example_user):
+        """Test creating a recipe."""
+
+        payload = {
+            "title": "Sample test recipe",
+            "time_minutes": 30,
+            "price": Decimal("5.99"),
+        }
+        res = authenticated_client.post(RECIPES_URL, payload)
+
+        assert res.status_code == status.HTTP_201_CREATED
+        recipe = Recipe.objects.get(id=res.data["id"])
+        for k, v in payload.items():
+            assert getattr(recipe, k) == v
+        assert recipe.user == example_user
