@@ -103,3 +103,22 @@ class TestPrivateRecipeApi:
         for k, v in payload.items():
             assert getattr(recipe, k) == v
         assert recipe.user == example_user
+
+    def test_perform_partial_update(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        example_user,
+    ):
+        """Test partial update on recipe."""
+
+        user = example_user
+        recipe = create_example_recipe
+        payload = {"title": "New recipe title"}
+        url = detail_url(recipe_id=recipe.id)
+        res = authenticated_client.patch(url, payload)
+
+        assert res.status_code == status.HTTP_200_OK
+        recipe.refresh_from_db()
+        assert recipe.title == payload["title"]
+        assert recipe.user == user
