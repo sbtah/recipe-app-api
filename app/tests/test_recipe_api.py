@@ -42,8 +42,6 @@ class TestPrivateRecipeApi:
     ):
         """Test retrieving a list of recipes."""
 
-        # recipe_1 = create_example_recipe
-        # recipe_2 = create_example_recipe
         for _ in range(3):
             create_example_recipe
         res = authenticated_client.get(RECIPES_URL)
@@ -121,4 +119,27 @@ class TestPrivateRecipeApi:
         assert res.status_code == status.HTTP_200_OK
         recipe.refresh_from_db()
         assert recipe.title == payload["title"]
+        assert recipe.user == user
+
+    def test_perform_full_update(
+        self, authenticated_client, create_example_recipe, example_user
+    ):
+        """Test full update of recipe."""
+
+        user = example_user
+        recipe = create_example_recipe
+        payload = {
+            "title": "New recipe title",
+            "time_minutes": 12,
+            "price": Decimal("7.70"),
+            "description": "New description",
+            "link": "http://example.com/new-recipe.pdf/",
+        }
+        url = detail_url(recipe_id=recipe.id)
+        res = authenticated_client.put(url, payload)
+
+        assert res.status_code == status.HTTP_200_OK
+        recipe.refresh_from_db()
+        for k, v in payload.items():
+            assert getattr(recipe, k) == v
         assert recipe.user == user
