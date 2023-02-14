@@ -177,3 +177,17 @@ class TestPrivateRecipeApi:
 
         assert res.status_code == status.HTTP_204_NO_CONTENT
         assert Recipe.objects.filter(id=recipe.id).exists() is False
+
+    def test_delete_other_users_recipe_error(
+        self,
+        authenticated_client,
+        create_example_recipe_for_user_2,
+    ):
+        """Test trying to delete another users recipe returns an error."""
+
+        recipe = create_example_recipe_for_user_2
+        url = detail_url(recipe_id=recipe.id)
+        res = authenticated_client.delete(url)
+
+        assert res.status_code == status.HTTP_404_NOT_FOUND
+        assert Recipe.objects.filter(id=recipe.id).exists() is True
