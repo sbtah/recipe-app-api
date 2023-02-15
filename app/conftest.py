@@ -3,6 +3,7 @@ from decimal import Decimal
 import pytest
 from django.contrib.auth import get_user_model
 from recipes.models import Recipe
+from tags.models import Tag
 
 
 @pytest.fixture
@@ -55,6 +56,27 @@ def create_example_recipe_for_user_2(example_user_2):
         price=Decimal("7.50"),
         description="Sample Recipe Description 2.",
     )
+
+
+@pytest.fixture
+def create_example_tag_1(example_user):
+    """Create and return sample Tag object."""
+
+    return Tag.objects.create(user=example_user, name="Sample Tag X")
+
+
+@pytest.fixture
+def create_example_tag_2(example_user):
+    """Create and return sample Tag object."""
+
+    return Tag.objects.create(user=example_user, name="Sample Tag Y")
+
+
+@pytest.fixture
+def create_example_tag_for_user_2(example_user_2):
+    """Create and return sample Tag object."""
+
+    return Tag.objects.create(user=example_user_2, name="Sample Tag Z")
 
 
 @pytest.fixture
