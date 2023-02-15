@@ -162,6 +162,7 @@ class TestPrivateRecipeApi:
         res = authenticated_client.patch(url, payload)
         recipe.refresh_from_db()
 
+        assert res.status_code == status.HTTP_200_OK
         assert recipe.user == user
 
     def test_delete_recipe(
