@@ -8,6 +8,7 @@ from tags.serializers import TagSerializer
 
 class TagViewSet(
     mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
