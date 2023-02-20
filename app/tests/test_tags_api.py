@@ -12,6 +12,10 @@ TAGS_URL = reverse("recipes:tag-list")
 pytestmark = pytest.mark.django_db
 
 
+def detail_url(tag_id):
+    return reverse("recipes:tag-detail", args=[tag_id])
+
+
 class TestPublicTagsApi:
     """Test unauthenticated API requests."""
 
@@ -62,3 +66,15 @@ class TestPrivateTagsApi:
         assert len(res.data) == 2
         assert res.data == serializer.data
         assert Tag.objects.all().count() == 3
+
+    def test_update_tag(self, authenticated_client, create_example_tag_1):
+        """Test updating a Tag successful."""
+
+        tag = create_example_tag_1
+        payload = {"name": "Dessert"}
+        url = detail_url(tag.id)
+        res = authenticated_client.patch(url, payload)
+
+        assert res.status_code == status.HTTP_200_OK
+        tag.refresh_from_db()
+        assert tag.name == payload["name"]
