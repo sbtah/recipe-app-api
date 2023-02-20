@@ -68,7 +68,7 @@ class TestPrivateTagsApi:
         assert Tag.objects.all().count() == 3
 
     def test_update_tag(self, authenticated_client, create_example_tag_1):
-        """Test updating a Tag successful."""
+        """Test updating a Tag is successful."""
 
         tag = create_example_tag_1
         payload = {"name": "Dessert"}
@@ -78,3 +78,13 @@ class TestPrivateTagsApi:
         assert res.status_code == status.HTTP_200_OK
         tag.refresh_from_db()
         assert tag.name == payload["name"]
+
+    def test_delete_tag(self, authenticated_client, create_example_tag_1):
+        """Test deleting a Tag is successful."""
+
+        tag = create_example_tag_1
+        url = detail_url(tag.id)
+        res = authenticated_client.delete(url)
+
+        assert res.status_code == status.HTTP_204_NO_CONTENT
+        assert Tag.objects.all().count() == 0
