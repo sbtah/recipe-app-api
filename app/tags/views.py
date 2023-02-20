@@ -6,7 +6,11 @@ from tags.models import Tag
 from tags.serializers import TagSerializer
 
 
-class TagViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class TagViewSet(
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     """Manage Tags in the database."""
 
     serializer_class = TagSerializer
