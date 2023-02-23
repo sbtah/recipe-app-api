@@ -6,6 +6,7 @@ from decimal import Decimal
 import pytest
 from django.urls import reverse
 from recipes.models import Recipe
+from tags.models import Tag
 from recipes.serializers import RecipeDetailSerializer, RecipeSerializer
 from rest_framework import status
 
@@ -192,3 +193,37 @@ class TestPrivateRecipeApi:
 
         assert res.status_code == status.HTTP_404_NOT_FOUND
         assert Recipe.objects.filter(id=recipe.id).exists() is True
+
+    def test_create_recipe_with_new_tags(
+        self,
+        authenticated_client,
+        example_user,
+    ):
+        """Test creating a recipe with new Tags."""
+
+        user = example_user
+        payload = {
+            "title": "New recipe title",
+            "time_minutes": 12,
+            "price": Decimal("7.70"),
+            "tags": [{"name", "Tag1"}, {"name", "Tag2"}],
+            "description": "New description",
+            "link": "http://example.com/new-recipe.pdf/",
+        }
+        res = authenticated_client.post(RECIPES_URL, payload, format="json")
+
+        assert res.status_code == status.HTTP_201_CREATED
+        assert Recipe.objects.all().count() == 1
+        assert Tag.objects.all().count() == 2
+        recipes = Recipe.objects.filter(user=user)
+        assert recipes[0].tags.count() == 2
+        for tag in payload["tags"]:
+            exists = (
+                recipes[0]
+                .tags.filter(
+                    name=tag["name"],
+                    user=user,
+                )
+                .exists()
+            )
+            assert exists is True
