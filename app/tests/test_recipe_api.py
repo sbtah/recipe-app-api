@@ -262,3 +262,62 @@ class TestPrivateRecipeApi:
                 .exists()
             )
             assert exists is True
+
+    def test_create_tag_on_update(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        example_user,
+    ):
+        """Test creating a Tag when updating a Recipe."""
+
+        recipe = create_example_recipe
+        user = example_user
+        payload = {"tags": [{"name": "Other"}]}
+        url = detail_url(recipe_id=recipe.id)
+        res = authenticated_client.patch(url, payload, format="json")
+
+        assert res.status_code == status.HTTP_200_OK
+        new_tag = Tag.objects.get(user=user, name="Other")
+        assert new_tag in recipe.tags.all()
+
+    def test_update_recipe_assign_tag(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        create_example_tag_1,
+        create_example_tag_2,
+    ):
+        """Test assigning an existing Tag when updating a recipe."""
+
+        tag_1 = create_example_tag_1
+        tag_2 = create_example_tag_2
+        recipe = create_example_recipe
+        recipe.tags.add(tag_1)
+        payload = {"tags": [{"name": f"{tag_2.name}"}]}
+        url = detail_url(recipe_id=recipe.id)
+        res = authenticated_client.patch(url, payload, format="json")
+
+        assert res.status_code == status.HTTP_200_OK
+        assert tag_2 in recipe.tags.all()
+        assert tag_1 not in recipe.tags.all()
+
+    def test_clear_recipe_tags(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        create_example_tag_1,
+        create_example_tag_2,
+    ):
+        """Test clearing a Recipe Tags."""
+
+        recipe = create_example_recipe
+        tag_1 = create_example_tag_1
+        tag_2 = create_example_tag_2
+        recipe.tags.add(tag_1, tag_2)
+        payload = {"tags": []}
+        url = detail_url(recipe_id=recipe.id)
+        res = authenticated_client.patch(url, payload, format="json")
+
+        assert res.status_code == status.HTTP_200_OK
+        assert recipe.tags.count() == 0
