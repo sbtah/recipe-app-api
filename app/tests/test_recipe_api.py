@@ -203,10 +203,44 @@ class TestPrivateRecipeApi:
 
         user = example_user
         payload = {
+            "title": "Sample test recipe",
+            "time_minutes": 30,
+            "price": Decimal("5.99"),
+            "tags": [{"name": "Tag1"}, {"name": "Tag2"}],
+        }
+        res = authenticated_client.post(RECIPES_URL, payload, format="json")
+
+        assert res.status_code == status.HTTP_201_CREATED
+        assert Recipe.objects.all().count() == 1
+        assert Tag.objects.all().count() == 2
+        recipes = Recipe.objects.filter(user=user)
+        assert recipes[0].tags.count() == 2
+        for tag in payload["tags"]:
+            exists = (
+                recipes[0]
+                .tags.filter(
+                    name=tag["name"],
+                    user=user,
+                )
+                .exists()
+            )
+            assert exists is True
+
+    def test_create_recipe_with_existing_tags(
+        self,
+        authenticated_client,
+        example_user,
+        create_example_tag_1,
+    ):
+        """Test creating a recipe with existing Tag."""
+
+        tag_1 = create_example_tag_1
+        user = example_user
+        payload = {
             "title": "New recipe title",
             "time_minutes": 12,
             "price": Decimal("7.70"),
-            "tags": [{"name", "Tag1"}, {"name", "Tag2"}],
+            "tags": [{"name": tag_1.name}, {"name": "Tag New"}],
             "description": "New description",
             "link": "http://example.com/new-recipe.pdf/",
         }
@@ -217,6 +251,7 @@ class TestPrivateRecipeApi:
         assert Tag.objects.all().count() == 2
         recipes = Recipe.objects.filter(user=user)
         assert recipes[0].tags.count() == 2
+        assert tag_1 in recipes[0].tags.all()
         for tag in payload["tags"]:
             exists = (
                 recipes[0]
