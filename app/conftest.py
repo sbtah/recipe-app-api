@@ -4,6 +4,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from recipes.models import Recipe
 from tags.models import Tag
+from ingredients.models import Ingredient
 
 
 @pytest.fixture
@@ -77,6 +78,30 @@ def create_example_tag_for_user_2(example_user_2):
     """Create and return sample Tag object."""
 
     return Tag.objects.create(user=example_user_2, name="Sample Tag Z")
+
+
+@pytest.fixture
+def create_example_ingredient(example_user):
+    """Create and return sample Ingredient object."""
+
+    return Ingredient.objects.create(user=example_user, name="Ingredient1")
+
+
+@pytest.fixture
+def create_example_ingredient_for_user_2(example_user_2):
+    """Create and return sample Ingredient object."""
+
+    return Ingredient.objects.create(user=example_user_2, name="IngredientX")
+
+
+@pytest.fixture
+def create_example_ingredients_list(example_user):
+    """Create and return list of Ingredient objects."""
+
+    return [
+        Ingredient.objects.create(user=example_user, name=f"Ingredient{_}")
+        for _ in range(1, 4)
+    ]
 
 
 @pytest.fixture
