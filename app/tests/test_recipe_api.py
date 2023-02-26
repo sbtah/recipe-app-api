@@ -386,3 +386,71 @@ class TestPrivateRecipeApi:
                 name=ingredient["name"], user=user
             ).exists()
             assert exists is True
+
+    def test_create_ingredient_on_update(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        example_user,
+    ):
+        """Test creating an Ingredient when updating a Recipe."""
+
+        user = example_user
+        recipe = create_example_recipe
+        payload = {
+            "ingredients": [
+                {"name": "NewIngredientX"},
+                {"name": "NewIngredientY"},
+            ]
+        }
+        url = detail_url(recipe_id=recipe.id)
+        res = authenticated_client.patch(url, payload, format="json")
+
+        assert res.status_code == status.HTTP_200_OK
+        recipes = Recipe.objects.filter(user=user)
+        recipe = recipes[0]
+        assert recipe.ingredients.count() == 2
+        for ingredient in payload["ingredients"]:
+            exists = recipe.ingredients.filter(
+                name=ingredient["name"], user=user
+            ).exists()
+            assert exists is True
+
+    def test_update_recipe_assign_ingredient(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        create_example_ingredients_list,
+    ):
+        """Test assigning an existing Ingredient when updating Recipe."""
+
+        ingredients = create_example_ingredients_list
+        recipe = create_example_recipe
+        recipe.ingredients.add(ingredients[0])
+        payload = {"ingredients": [{"name": ingredients[1].name}]}
+        url = detail_url(recipe_id=recipe.id)
+        res = authenticated_client.patch(url, payload, format="json")
+
+        assert res.status_code == status.HTTP_200_OK
+        assert ingredients[1] in recipe.ingredients.all()
+        assert ingredients[0] not in recipe.ingredients.all()
+
+    def test_clear_recipe_ingredients(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        create_example_ingredient,
+    ):
+        """Test clearing a Recipe ingredients"""
+
+        ingredient = create_example_ingredient
+        recipe = create_example_recipe
+        recipe.ingredients.add(ingredient)
+        assert ingredient in recipe.ingredients.all()
+        payload = {"ingredients": []}
+        url = detail_url(recipe_id=recipe.id)
+        res = authenticated_client.patch(url, payload, format="json")
+
+        assert res.status_code == status.HTTP_200_OK
+        assert ingredient not in recipe.ingredients.all()
+        assert recipe.ingredients.count() == 0
