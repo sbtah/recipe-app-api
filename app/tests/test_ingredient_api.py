@@ -12,6 +12,11 @@ INGREDIENTS_URL = reverse("recipes:ingredient-list")
 pytestmark = pytest.mark.django_db
 
 
+def detail_url(ingredient_id):
+    """Create and return an ingredient detail url."""
+    return reverse("recipes:ingredient-detail", args=[ingredient_id])
+
+
 class TestPublicIngredientApi:
     """Test unauthenticated API requests."""
 
@@ -54,3 +59,15 @@ class TestPrivateIngredientApi:
 
         assert res.status_code == status.HTTP_200_OK
         assert len(res.data) == 3
+
+    def test_update_ingredient(self, authenticated_client, create_example_ingredient):
+        """Test updating and Ingredient."""
+
+        ingredient = create_example_ingredient
+        payload = {"name": "New Name!"}
+        url = detail_url(ingredient_id=ingredient.id)
+        res = authenticated_client.patch(url, payload)
+        ingredient.refresh_from_db()
+
+        assert res.status_code == status.HTTP_200_OK
+        assert ingredient.name == payload["name"]
