@@ -7,7 +7,10 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class IngredientViewSet(
-    mixins.UpdateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+    mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
 ):
     """Manage Ingredients in the database."""
 
