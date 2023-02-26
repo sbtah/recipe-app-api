@@ -60,7 +60,11 @@ class TestPrivateIngredientApi:
         assert res.status_code == status.HTTP_200_OK
         assert len(res.data) == 3
 
-    def test_update_ingredient(self, authenticated_client, create_example_ingredient):
+    def test_update_ingredient(
+        self,
+        authenticated_client,
+        create_example_ingredient,
+    ):
         """Test updating and Ingredient."""
 
         ingredient = create_example_ingredient
@@ -71,3 +75,18 @@ class TestPrivateIngredientApi:
 
         assert res.status_code == status.HTTP_200_OK
         assert ingredient.name == payload["name"]
+
+    def test_delete_ingredient(
+        self,
+        authenticated_client,
+        create_example_ingredient,
+    ):
+        """Test deleting and Ingredient."""
+
+        ingredient = create_example_ingredient
+        url = detail_url(ingredient_id=ingredient.id)
+        assert Ingredient.objects.count() == 1
+        res = authenticated_client.delete(url)
+
+        assert res.status_code == status.HTTP_204_NO_CONTENT
+        assert Ingredient.objects.count() == 0
