@@ -5,11 +5,11 @@ from decimal import Decimal
 
 import pytest
 from django.urls import reverse
+from ingredients.models import Ingredient
 from recipes.models import Recipe
-from tags.models import Tag
 from recipes.serializers import RecipeDetailSerializer, RecipeSerializer
 from rest_framework import status
-
+from tags.models import Tag
 
 RECIPES_URL = reverse("recipes:recipe-list")
 pytestmark = pytest.mark.django_db
@@ -321,3 +321,66 @@ class TestPrivateRecipeApi:
 
         assert res.status_code == status.HTTP_200_OK
         assert recipe.tags.count() == 0
+
+    def test_create_recipe_with_new_ingredients(
+        self,
+        authenticated_client,
+        example_user,
+    ):
+        """Test creating a Recipe with new Ingredients."""
+
+        user = example_user
+        payload = {
+            "title": "New recipe title",
+            "time_minutes": 12,
+            "price": Decimal("7.70"),
+            "tags": [{"name": "Tag1"}, {"name": "Tag2"}],
+            "ingredients": [{"name": "Ingredient1"}, {"name": "Ingredient2"}],
+            "description": "New description",
+            "link": "http://example.com/new-recipe.pdf/",
+        }
+        res = authenticated_client.post(RECIPES_URL, payload, format="json")
+
+        assert res.status_code == status.HTTP_201_CREATED
+        recipes = Recipe.objects.filter(user=user)
+        assert recipes.count() == 1
+        recipe = recipes[0]
+        assert recipe.ingredients.count() == 2
+        for ingredient in payload["ingredients"]:
+            exists = recipe.ingredients.filter(
+                name=ingredient["name"], user=user
+            ).exists()
+            assert exists is True
+
+    def test_create_recipe_with_existing_ingredient(
+        self,
+        authenticated_client,
+        create_example_ingredient,
+        example_user,
+    ):
+        """Test creating a new Recipe with existing Ingredients."""
+
+        user = example_user
+        ingredient = create_example_ingredient
+        payload = {
+            "title": "New recipe title",
+            "time_minutes": 12,
+            "price": Decimal("7.70"),
+            "tags": [{"name": "Tag1"}, {"name": "Tag2"}],
+            "ingredients": [{"name": ingredient.name}, {"name": "Ingredient2"}],
+            "description": "New description",
+            "link": "http://example.com/new-recipe.pdf/",
+        }
+        res = authenticated_client.post(RECIPES_URL, payload, format="json")
+
+        assert res.status_code == status.HTTP_201_CREATED
+        recipes = Recipe.objects.filter(user=user)
+        assert recipes.count() == 1
+        recipe = recipes[0]
+        assert recipe.ingredients.count() == 2
+        assert ingredient in recipe.ingredients.all()
+        for ingredient in payload["ingredients"]:
+            exists = recipe.ingredients.filter(
+                name=ingredient["name"], user=user
+            ).exists()
+            assert exists is True
