@@ -5,7 +5,6 @@ from decimal import Decimal
 
 import pytest
 from django.urls import reverse
-from ingredients.models import Ingredient
 from recipes.models import Recipe
 from recipes.serializers import RecipeDetailSerializer, RecipeSerializer
 from rest_framework import status
@@ -367,7 +366,10 @@ class TestPrivateRecipeApi:
             "time_minutes": 12,
             "price": Decimal("7.70"),
             "tags": [{"name": "Tag1"}, {"name": "Tag2"}],
-            "ingredients": [{"name": ingredient.name}, {"name": "Ingredient2"}],
+            "ingredients": [
+                {"name": ingredient.name},
+                {"name": "Ingredient2"},
+            ],
             "description": "New description",
             "link": "http://example.com/new-recipe.pdf/",
         }
