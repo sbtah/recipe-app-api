@@ -2,6 +2,7 @@
 Tests for Recipe model.
 """
 import pytest
+from unittest.mock import patch
 from decimal import Decimal
 from recipes import models
 
@@ -29,3 +30,13 @@ class TestRecipeModel:
         assert str(recipe) == recipe.title
         assert models.Recipe.objects.all().count() == 1
         assert isinstance(recipe, models.Recipe) is True
+
+    @patch("recipes.models.uuid.uuid4")
+    def test_recipe_file_name_uuid(self, mock_uuid):
+        """Test generating image path"""
+
+        uuid = "test-uuid"
+        mock_uuid.return_value = uuid
+        file_path = models.recipe_image_file_path(None, "example.jpg")
+
+        assert file_path == f"uploads/recipe/{uuid}.jpg"
