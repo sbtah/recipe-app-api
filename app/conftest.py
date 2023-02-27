@@ -36,14 +36,15 @@ def example_user_2():
 @pytest.fixture
 def create_example_recipe(example_user):
     """Create and return sample Recipe."""
-
-    return Recipe.objects.create(
+    recipe = Recipe.objects.create(
         user=example_user,
         title="Sample Recipe Name",
         time_minutes=5,
         price=Decimal("5.50"),
         description="Sample Recipe Description.",
     )
+    yield recipe
+    recipe.image.delete()
 
 
 @pytest.fixture
