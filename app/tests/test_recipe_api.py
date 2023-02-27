@@ -1,14 +1,18 @@
 """
 Tests for recipe APIs.
 """
+import os
+import tempfile
 from decimal import Decimal
 
 import pytest
 from django.urls import reverse
+from PIL import Image
 from recipes.models import Recipe
 from recipes.serializers import RecipeDetailSerializer, RecipeSerializer
 from rest_framework import status
 from tags.models import Tag
+
 
 RECIPES_URL = reverse("recipes:recipe-list")
 pytestmark = pytest.mark.django_db
@@ -17,6 +21,11 @@ pytestmark = pytest.mark.django_db
 def detail_url(recipe_id):
     """Create and return recipe detail URL."""
     return reverse("recipes:recipe-detail", args=[recipe_id])
+
+
+def image_upload_url(recipe_id):
+    """Create and return and image upload URL."""
+    return reverse("recipes:recipe-upload-image", args=[recipe_id])
 
 
 class TestPublicRecipeApi:
@@ -454,3 +463,38 @@ class TestPrivateRecipeApi:
         assert res.status_code == status.HTTP_200_OK
         assert ingredient not in recipe.ingredients.all()
         assert recipe.ingredients.count() == 0
+
+
+class TestImageUpload:
+    """Tests for Image upload API."""
+
+    def test_upload_image(self, create_example_recipe, authenticated_client):
+        """Test uploading an image to Recipe."""
+
+        recipe = create_example_recipe
+        url = image_upload_url(recipe_id=recipe.id)
+        with tempfile.NamedTemporaryFile(suffix=".jpg") as image_file:
+            img = Image.new("RGB", (10, 10))
+            img.save(image_file, format="JPEG")
+            image_file.seek(0)
+            payload = {"image": image_file}
+            res = authenticated_client.post(url, payload, format="multipart")
+        recipe.refresh_from_db()
+
+        assert res.status_code == status.HTTP_200_OK
+        assert "image" in res.data
+        assert os.path.exists(recipe.image.path) is True
+
+    def test_upload_image_bad_request(
+        self,
+        create_example_recipe,
+        authenticated_client,
+    ):
+        """Test uploading invalid image."""
+
+        recipe = create_example_recipe
+        url = image_upload_url(recipe_id=recipe.id)
+        payload = {"image": "notanimage"}
+        res = authenticated_client.post(url, payload, format="multipart")
+
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
