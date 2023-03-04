@@ -464,6 +464,64 @@ class TestPrivateRecipeApi:
         assert ingredient not in recipe.ingredients.all()
         assert recipe.ingredients.count() == 0
 
+    def test_filter_by_tags(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        create_example_recipe_2,
+        create_example_recipe_3,
+        create_example_tag_1,
+        create_example_tag_2,
+    ):
+        """Test filtering Recipes by Tags."""
+
+        recipe_1 = create_example_recipe
+        recipe_2 = create_example_recipe_2
+        recipe_3 = create_example_recipe_3
+        tag_1 = create_example_tag_1
+        tag_2 = create_example_tag_2
+        recipe_1.tags.add(tag_1)
+        recipe_2.tags.add(tag_2)
+
+        serializer_1 = RecipeSerializer(recipe_1)
+        serializer_2 = RecipeSerializer(recipe_2)
+        serializer_3 = RecipeSerializer(recipe_3)
+        params = {"tags": f"{tag_1.id}, {tag_2.id}"}
+        res = authenticated_client.get(RECIPES_URL, params=params)
+
+        assert serializer_1.data in res.data
+        assert serializer_2.data in res.data
+        assert serializer_3 not in res.data
+
+    def test_filter_by_ingredients(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        create_example_recipe_2,
+        create_example_recipe_3,
+        create_example_ingredients_list,
+    ):
+        """Test filtering Recipes by Ingredients"""
+
+        recipe_1 = create_example_recipe
+        recipe_2 = create_example_recipe_2
+        recipe_3 = create_example_recipe_3
+        ingredients = create_example_ingredients_list
+        ingredient_1 = ingredients[0]
+        ingredient_2 = ingredients[1]
+        recipe_1.ingredients.add(ingredient_1)
+        recipe_2.ingredients.add(ingredient_2)
+
+        serializer_1 = RecipeSerializer(recipe_1)
+        serializer_2 = RecipeSerializer(recipe_2)
+        serializer_3 = RecipeSerializer(recipe_3)
+        params = {"ingredients": f"{ingredient_1.id}, {ingredient_2.id}"}
+        res = authenticated_client.get(RECIPES_URL, params=params)
+
+        assert serializer_1.data in res.data
+        assert serializer_2.data in res.data
+        assert serializer_3 not in res.data
+
 
 class TestImageUpload:
     """Tests for Image upload API."""
