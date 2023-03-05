@@ -7,8 +7,6 @@ from django.urls import reverse
 from rest_framework import status
 from tags.models import Tag
 from tags.serializers import TagSerializer
-from recipes.models import Recipe
-
 
 TAGS_URL = reverse("recipes:tag-list")
 pytestmark = pytest.mark.django_db

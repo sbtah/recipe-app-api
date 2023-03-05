@@ -5,9 +5,7 @@ import pytest
 from django.urls import reverse
 from ingredients.models import Ingredient
 from ingredients.serializers import IngredientSerializer
-from recipes.models import Recipe
 from rest_framework import status
-
 
 INGREDIENTS_URL = reverse("recipes:ingredient-list")
 pytestmark = pytest.mark.django_db
