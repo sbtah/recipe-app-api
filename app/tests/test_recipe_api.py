@@ -487,11 +487,12 @@ class TestPrivateRecipeApi:
         serializer_2 = RecipeSerializer(recipe_2)
         serializer_3 = RecipeSerializer(recipe_3)
         params = {"tags": f"{tag_1.id}, {tag_2.id}"}
-        res = authenticated_client.get(RECIPES_URL, params=params)
+        res = authenticated_client.get(RECIPES_URL, params)
 
         assert serializer_1.data in res.data
         assert serializer_2.data in res.data
-        assert serializer_3 not in res.data
+        assert len(res.data) == 2
+        assert serializer_3.data not in res.data
 
     def test_filter_by_ingredients(
         self,
@@ -516,11 +517,12 @@ class TestPrivateRecipeApi:
         serializer_2 = RecipeSerializer(recipe_2)
         serializer_3 = RecipeSerializer(recipe_3)
         params = {"ingredients": f"{ingredient_1.id}, {ingredient_2.id}"}
-        res = authenticated_client.get(RECIPES_URL, params=params)
+        res = authenticated_client.get(RECIPES_URL, params)
 
         assert serializer_1.data in res.data
         assert serializer_2.data in res.data
-        assert serializer_3 not in res.data
+        assert len(res.data) == 2
+        assert serializer_3.data not in res.data
 
 
 class TestImageUpload:
