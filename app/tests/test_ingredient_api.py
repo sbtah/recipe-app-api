@@ -5,6 +5,7 @@ import pytest
 from django.urls import reverse
 from ingredients.models import Ingredient
 from ingredients.serializers import IngredientSerializer
+from recipes.models import Recipe
 from rest_framework import status
 
 
@@ -90,3 +91,38 @@ class TestPrivateIngredientApi:
 
         assert res.status_code == status.HTTP_204_NO_CONTENT
         assert Ingredient.objects.count() == 0
+
+    def test_filter_ingredients_assigned_to_recipes(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        create_example_ingredients_list,
+    ):
+        """Test listing Ingredients by those assigned to Recipes."""
+
+        recipe = create_example_recipe
+        ingredients = create_example_ingredients_list
+        recipe.ingredients.add(ingredients[0])
+        serializer_1 = IngredientSerializer(ingredients[0])
+        res = authenticated_client.get(INGREDIENTS_URL, {"assigned_only": 1})
+
+        assert serializer_1.data in res.data
+        assert len(res.data) == 1
+
+    def test_filtered_ingredients_unique(
+        self,
+        authenticated_client,
+        create_example_recipe,
+        create_example_recipe_2,
+        create_example_ingredients_list,
+    ):
+        """Test filtered Ingredients returns unique list."""
+
+        ingredients = create_example_ingredients_list
+        recipe_1 = create_example_recipe
+        recipe_2 = create_example_recipe_2
+        recipe_1.ingredients.add(ingredients[0])
+        recipe_2.ingredients.add(ingredients[0])
+        res = authenticated_client.get(INGREDIENTS_URL, {"assigned_only": 1})
+
+        assert len(res.data) == 1
