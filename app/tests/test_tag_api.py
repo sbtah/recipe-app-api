@@ -1,11 +1,13 @@
 """
 Tests for the Tags API.
 """
+
 import pytest
 from django.urls import reverse
 from rest_framework import status
 from tags.models import Tag
 from tags.serializers import TagSerializer
+from recipes.models import Recipe
 
 
 TAGS_URL = reverse("recipes:tag-list")
@@ -88,3 +90,44 @@ class TestPrivateTagsApi:
 
         assert res.status_code == status.HTTP_204_NO_CONTENT
         assert Tag.objects.all().count() == 0
+
+    def test_filter_tags_assigned_to_recipes(
+        self,
+        authenticated_client,
+        create_example_tag_1,
+        create_example_tag_2,
+        create_example_recipe,
+    ):
+        """Test listing Tags to those assigned to Recipes."""
+
+        tag_1 = create_example_tag_1
+        tag_2 = create_example_tag_2
+        recipe_1 = create_example_recipe
+        recipe_1.tags.add(tag_1)
+        serializer_1 = TagSerializer(tag_1)
+        serializer_2 = TagSerializer(tag_2)
+        res = authenticated_client.get(TAGS_URL, {"assigned_only": 1})
+
+        assert serializer_1.data in res.data
+        assert serializer_2.data not in res.data
+        assert len(res.data) == 1
+
+    def test_filtered_tags_unique(
+        self,
+        authenticated_client,
+        create_example_tag_1,
+        create_example_tag_2,
+        create_example_recipe,
+        create_example_recipe_2,
+    ):
+        """Test filtered tags returns a unique list."""
+
+        tag_1 = create_example_tag_1
+        create_example_tag_2
+        recipe_1 = create_example_recipe
+        recipe_2 = create_example_recipe_2
+        recipe_1.tags.add(tag_1)
+        recipe_2.tags.add(tag_1)
+        res = authenticated_client.get(TAGS_URL, {"assigned_only": 1})
+
+        assert len(res.data) == 1
