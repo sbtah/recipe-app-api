@@ -22,6 +22,7 @@ services:
       - DB_NAME=recipedb
       - DB_USER=recipeuser
       - DB_PASS=changeme
+      - DEBUG=1
     depends_on:
       - recipe-db
 
